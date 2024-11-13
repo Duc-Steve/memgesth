@@ -105,5 +105,6 @@ class ConnexionWindow(QMainWindow):
     def open_global_action(self):
         from views.fenetres.global_action_window import GlobaleActionWindow  # Importation de la fenêtre GlobaleAction
         """Ouvre le tableau de bord après connexion."""
+        self.hide()  # Cacher la fenêtre actuelle
         self.global_action_window = GlobaleActionWindow()  # Remplacez par votre fenêtre principale
         self.global_action_window.show()

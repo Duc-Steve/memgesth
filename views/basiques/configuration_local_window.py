@@ -91,10 +91,8 @@ class ConfigurationLocalWindow(QWidget):
                 data = response.json()
                 # Vérifie si des administrateurs existent
                 if data['code'] == 616:
-                    # Si des administrateurs existent déjà, informer l'utilisateur
-                    # Affiche la fenêtre de connexion si non connecté
-                    connexion_window = ConnexionWindow()
-                    connexion_window.show()
+                    # Si aucun administrateur existe, ouvrir la fenêtre de connexion
+                    self.open_conneion_window()
                 else:
                     # Si aucun administrateur n'existe, ouvrir la fenêtre de création du premier compte
                     self.open_administrateur_window()
@@ -114,3 +112,13 @@ class ConfigurationLocalWindow(QWidget):
         self.hide()  # Cacher la fenêtre actuelle
         self.administrateur_window = AdministrateurWindow()  # Passer l'instance courante en tant que parent à AdministrateurWindow
         self.administrateur_window.show()
+
+
+    def open_conneion_window(self):
+        """
+        Affiche la fenêtre de connexion.
+        """
+        self.hide()  # Cacher la fenêtre actuelle
+        # Affiche la fenêtre de connexion si non connecté
+        self.connexion_window = ConnexionWindow()
+        self.connexion_window.show()
