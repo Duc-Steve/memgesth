@@ -90,7 +90,7 @@ def main():
                             user_session = load_user_session()
                             
                             # Vérifie si l'utilisateur est connecté
-                            if user_session and "nom" in user_session and "prenom" in user_session:
+                            if user_session:
                                 # Affiche la fenêtre principale des actions
                                 globale_action_window = GlobaleActionWindow()
                                 globale_action_window.show()
@@ -119,7 +119,7 @@ def main():
                             user_session = load_user_session()
                             
                             # Vérifie si l'utilisateur est connecté
-                            if user_session and "nom" in user_session and "prenom" in user_session:
+                            if user_session:
                                 # Affiche la fenêtre principale des actions
                                 globale_action_window = GlobaleActionWindow()
                                 globale_action_window.show()
