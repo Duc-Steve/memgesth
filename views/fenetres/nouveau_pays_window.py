@@ -2,12 +2,16 @@ from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButt
 from config.image_path import ImagePath  # Importation de la classe de configuration du logo
 from services.session_manager import SessionManager
 import requests  # Importation de la bibliothèque requests pour faire des requêtes HTTP
-from services.configuration_manager import get_authentication_key, get_license_key, get_api_url, get_api_token
+from services.configuration_manager import get_api_url
+from PySide6.QtCore import Signal
 
 
 
 
 class NouveauPaysWindow(QDialog):
+    # Définir un signal personnalisé
+    pays_enregistre = Signal()
+    
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -60,6 +64,13 @@ class NouveauPaysWindow(QDialog):
 
     def enregistrer_pays(self):
         """Action pour enregistrer le pays"""
+        
+        
+        # Vérification de la session utilisateur
+        self.session_manager = SessionManager()  # Créer une instance de SessionManager
+        self.admin_global = self.session_manager.load_session()  # Charger la session
+        self.admin_data = self.admin_global.get("admin", {})
+        
         nom = self.nom_pays.text()
         code = self.code_pays.text()
         
@@ -71,12 +82,8 @@ class NouveauPaysWindow(QDialog):
         account_data = {
             "nom": nom,
             "code": code,
+            "id_admin": self.admin_data.get('id_admin')
         }
-        
-        # Vérification de la session utilisateur
-        self.session_manager = SessionManager()  # Créer une instance de SessionManager
-        self.admin_global = self.session_manager.load_session()  # Charger la session
-        self.admin_data = self.admin_global.get("admin", {})
         
         
         # Ajouter le suffixe /nouveau-pays à l'URL de l'API
@@ -89,8 +96,9 @@ class NouveauPaysWindow(QDialog):
                 
                 QMessageBox.information(self, "Succès", "Le pays à été enregistrer.")
                         
-                # Fermer la boîte de dialogue
-                self.accept()
+                # Émettre le signal pour informer la fenêtre principale
+                self.pays_enregistre.emit()
+                self.accept()  # Fermer la fenêtre
                 
             else:
                 # Afficher une boîte de message avec un titre correct

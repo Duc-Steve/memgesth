@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QDialog, QTableWidget, QTableWidgetItem,
-    QPushButton, QHBoxLayout, QComboBox, QLineEdit, QFileDialog, QMessageBox, QInputDialog
+    QPushButton, QHBoxLayout, QComboBox, QLineEdit, QFileDialog, QMessageBox, QInputDialog, QAbstractScrollArea
 )
 from PySide6.QtPrintSupport import QPrinter, QPrintDialog
 from PySide6.QtCore import Qt
@@ -9,6 +9,11 @@ from config.image_path import ImagePath  # Importation de la classe de configura
 import pandas as pd
 from fpdf import FPDF
 from views.fenetres.nouveau_pays_window import NouveauPaysWindow
+from services.configuration_manager import get_api_url
+import requests  # Importation de la bibliothèque requests pour faire des requêtes HTTP
+
+
+
 
 
 # Fenêtre pour le Tableau de Bord
@@ -37,8 +42,8 @@ class PaysInstallerWindow(QDialog):
         # Créer un layout horizontal pour les boutons en haut
         top_button_layout = QHBoxLayout()
         top_button_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
-
-        # Ajouter le bouton d'enregistrement du pays
+        
+        # Ajout du bouton d'enregistrement du pays
         add_button = QPushButton("Enregistrement d'un pays")
         add_button.setStyleSheet("margin-bottom: 15px; font-size: 16px; background-color: #67B667; color: white; padding: 10px; border-radius: 5px;")
         add_button.clicked.connect(self.ouvrir_nouveau_pays)
@@ -78,23 +83,21 @@ class PaysInstallerWindow(QDialog):
         filter_layout.addWidget(self.search_input)
 
         main_layout.addLayout(filter_layout)
-
-        # Créer le tableau avec 10 lignes et 16 colonnes
-        self.table = QTableWidget(10, 7, self)
-        self.table.showMaximized()
+        
+        # Créer le tableau avec 7 colonnes (le nombre de lignes sera ajusté dynamiquement)
+        self.table = QTableWidget(0, 7, self)  # Initialisation avec 0 lignes
+        self.table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
         # Définir les titres des colonnes
         column_titles = [
-            "Action", "Date de Création", "Date Mise à jours", "ID", "Nom Pays", "Code Pays", "Statut"
-        ] 
+            "Action", "Date de Création", "Date Mise à jour", "Nom Pays", "Code Pays", "Statut"
+        ]
+
         # Appliquer le style de l'en-tête du tableau
         self.table.horizontalHeader().setStyleSheet("background-color: #F02B3D; color: white;")
 
         # Appliquer les titres des colonnes
         self.table.setHorizontalHeaderLabels(column_titles)
-        
-        # Appliquer le style de l'en-tête du tableau
-        self.table.horizontalHeader().setStyleSheet("background-color: red; color: white;")
 
         # Exemple d'ajout de contenu aux lignes
         self.populate_table()
@@ -104,36 +107,68 @@ class PaysInstallerWindow(QDialog):
 
         # Appliquer le layout au QDialog
         self.setLayout(main_layout)
+        
+        
+    def mettre_a_jour_tableau(self):
+        """Mettre à jour le tableau avec les nouveaux pays"""
+        # Cette méthode devrait recharger les données de l'API et mettre à jour le tableau
+        self.populate_table()
+
 
     def populate_table(self):
-        """Remplir le tableau avec des données fictives et des boutons d'action"""
-        for row in range(10):
+        """Remplir le tableau avec des données et des boutons d'action"""
 
-            action_layout = QHBoxLayout()
-            modify_button = QPushButton()
-            modify_button.setIcon(QIcon("assets/icons/add.png"))
-            modify_button.setStyleSheet("background-color: green; color: white;")
+        # Récupérer la liste des pays depuis l'API
+        response = requests.get(f"{get_api_url()}/liste-pays")  # Assurez-vous que l'endpoint est correct
+
+        if response.status_code == 200:
+            data = response.json()
             
-            delete_button = QPushButton()
-            delete_button.setIcon(QIcon("assets/icons/add.png"))
-            delete_button.setStyleSheet("background-color: red; color: white;")
+            # Vérifier si la réponse contient un code de succès
+            if data.get('code') == 200:
+                # Remplir les données de la liste dans le tableau
+                pays_list = data.get('pays', [])  # Supposer que la clé 'pays' contient la liste des pays
 
-            action_layout.addWidget(modify_button)
-            action_layout.addWidget(delete_button)
-            action_widget = QWidget()
-            action_widget.setLayout(action_layout)
-            self.table.setCellWidget(row, 0, action_widget)
-            self.table.setItem(row, 1, QTableWidgetItem("01/01/2000"))  # Date de Création
-            self.table.setItem(row, 2, QTableWidgetItem("01/09/2023"))  # Date Mise à jours
-            self.table.setItem(row, 3, QTableWidgetItem(f"{row + 1}"))  # ID
-            self.table.setItem(row, 4, QTableWidgetItem(f"Nom{row + 1}"))  # Nom Pays
-            self.table.setItem(row, 5, QTableWidgetItem("Code XYZ "))  # Code Pays
-            self.table.setItem(row, 6, QTableWidgetItem("Actif")) # Statut
+                # Ajuster le nombre de lignes en fonction des données reçues
+                self.table.setRowCount(len(pays_list))
 
-            # Désactiver l'édition des cellules sauf pour la colonne Action
-            for col in range(1, 7):  # Désactive l'édition pour les colonnes 1 à 6
-                self.table.item(row, col).setFlags(self.table.item(row, col).flags() & ~Qt.ItemIsEditable)
+                for row, pays in enumerate(pays_list):
+                    action_layout = QHBoxLayout()
 
+                    modify_button = QPushButton()
+                    modify_button.setIcon(QIcon("assets/icons/edit.png"))
+                    modify_button.setStyleSheet("background-color: green; color: white;")
+                    
+                    delete_button = QPushButton()
+                    delete_button.setIcon(QIcon("assets/icons/delete.png"))
+                    delete_button.setStyleSheet("background-color: red; color: white;")
+
+                    action_layout.addWidget(modify_button)
+                    action_layout.addWidget(delete_button)
+
+                    action_widget = QWidget()
+                    action_widget.setLayout(action_layout)
+                    self.table.setCellWidget(row, 0, action_widget)
+
+                    # Ajouter les données de chaque pays dans le tableau
+                    self.table.setItem(row, 1, QTableWidgetItem(pays.get('dateCreation')))  # Date de création
+                    self.table.setItem(row, 2, QTableWidgetItem(pays.get('dateMiseJour')))  # Date de mise à jour
+                    self.table.setItem(row, 3, QTableWidgetItem(pays.get('nom')))  # Nom du pays
+                    self.table.setItem(row, 4, QTableWidgetItem(pays.get('code')))  # Code du pays
+                    self.table.setItem(row, 5, QTableWidgetItem(pays.get('statutPays')))  # Statut
+
+                    # Désactiver l'édition des cellules sauf pour la colonne d'actions
+                    for col in range(1, 6):
+                        item = self.table.item(row, col)
+                        if item:
+                            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+
+            else:
+                # Afficher une boîte de message d'avertissement si l'API répond avec un code d'erreur
+                QMessageBox.warning(self, "Erreur", data.get('message', 'Erreur inconnue de l\'API'))
+        else:
+            # Gérer les erreurs de connexion à l'API
+            QMessageBox.warning(self, "Erreur API", "Impossible de se connecter à l'API ou d'obtenir la liste des pays.")
 
 
     def update_table_data(self):
@@ -185,7 +220,7 @@ class PaysInstallerWindow(QDialog):
             QMessageBox.information(self, "Exportation réussie", f"Le fichier a été exporté avec succès à l'emplacement : {path}")
         except Exception as e:
             QMessageBox.critical(self, "Erreur d'exportation", f"Une erreur s'est produite lors de l'exportation : {str(e)}")   
-    
+
     def export_to_pdf(self):
         """Exporter les données du tableau en fichier PDF avec orientation dynamique"""
         path, _ = QFileDialog.getSaveFileName(self, "Enregistrer le fichier PDF", "", "Fichiers PDF (*.pdf)")
@@ -256,9 +291,11 @@ class PaysInstallerWindow(QDialog):
         painter.end()
 
     def ouvrir_nouveau_pays(self):
-        """Action pour ouvrir la fenêtre du formulaire d'enregistrement du pays"""
-        nouveau_pays = NouveauPaysWindow()
-        nouveau_pays.exec_()  # Afficher la fenêtre en mode modal
-        
-        
+        """Afficher la fenêtre NouveauPaysWindow lorsque le bouton est cliqué"""
+        # Créer une instance de NouveauPaysWindow
+        self.nouveau_pays_window = NouveauPaysWindow(self)
+        # Connecter le signal à la méthode pour mettre à jour le tableau
+        self.nouveau_pays_window.pays_enregistre.connect(self.mettre_a_jour_tableau)
+        self.nouveau_pays_window.exec()  # Utilisez exec() pour ouvrir la fenêtre comme une boîte de dialogue modale
+
         
