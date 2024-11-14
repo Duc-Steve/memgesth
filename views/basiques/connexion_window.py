@@ -28,7 +28,7 @@ class ConnexionWindow(QMainWindow):
         
         # Ajouter le logo
         self.logo_label = QLabel(self)
-        pixmap = QPixmap("assets/logoMemgesth.png")
+        pixmap = QPixmap("assets/images/logoMemgesth.png")
         self.logo_label.setPixmap(pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.logo_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.logo_label)

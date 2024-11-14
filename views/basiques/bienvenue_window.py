@@ -23,7 +23,7 @@ class WelcomeWindow(QMainWindow):
 
         # Ajouter le logo
         self.logo_label = QLabel(self)
-        pixmap = QPixmap("assets/logoMemgesth.png")
+        pixmap = QPixmap("assets/images/logoMemgesth.png")
         self.logo_label.setPixmap(pixmap.scaled(150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.logo_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.logo_label)
