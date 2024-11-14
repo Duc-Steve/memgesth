@@ -117,15 +117,17 @@ class GlobaleActionWindow(QWidget):
         sidebar_container.setFixedWidth(200)  # Largeur de la sidebar
 
         # Section principale des boutons
-        grid_layout = QHBoxLayout()  # Flexbox pour les boutons
+        grid_layout = QVBoxLayout()  # Flexbox pour les boutons
         grid_layout.setSpacing(10)  # Espacement entre les boutons
-        # Ajouter le widget user_info_widget au layout principal
+        # Ajouter la section user_info_widget en haut avec un stretch factor de 1 (20% de l'espace)
         grid_layout.addWidget(user_info_widget, 0, Qt.AlignTop | Qt.AlignRight)
         
        
         # Section principale des boutons
         action_layout = QHBoxLayout()  # Flexbox pour les boutons
+        action_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         action_layout.setSpacing(10)  # Espacement entre les boutons
+        action_layout.setContentsMargins(0, 0, 0, 0)  # Marges : top=10px, droite alignée
 
         # Liste des libellés de boutons
         button_labels = [
@@ -142,7 +144,7 @@ class GlobaleActionWindow(QWidget):
         # Créer les 8 boutons avec leurs libellés et les connecter à leurs actions
         for label in button_labels:
             button = QPushButton(label)
-            button.setFixedSize(120, 80)  # Taille des boutons (120px x 80px pour être plus large)
+            button.setFixedSize(300, 260)  # Taille des boutons (120px x 80px pour être plus large)
             button.setIcon(QIcon("assets/icons/add.png"))  # Ajouter une icône (mettre votre chemin ici)
             button.setStyleSheet(
                 """
@@ -160,8 +162,10 @@ class GlobaleActionWindow(QWidget):
             button.clicked.connect(button_actions[label])  # Connecter chaque bouton à son action
             action_layout.addWidget(button)
 
-        # Ajouter le layout des actions au layout principal (en bas)
+        # Ajouter la section action_layout en bas avec un stretch factor de 4 (80% de l'espace)
         grid_layout.addLayout(action_layout)
+        grid_layout.setStretch(0, 1)  # 20% pour user_info_widget
+        grid_layout.setStretch(1, 4)  # 80% pour action_layout
         
         # Ajouter la sidebar et les boutons au layout du contenu
         content_layout.addWidget(sidebar_container)  # Ajouter la sidebar à gauche
