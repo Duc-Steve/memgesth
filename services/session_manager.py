@@ -6,7 +6,7 @@ class SessionManager:
 
     def __init__(self):
         # Nom du fichier où les informations de session seront stockées localement
-        self.session_file = "user_session.json"
+        self.session_file = "admin_session.json"
 
     def save_session(self, user_data):
         """
