@@ -41,11 +41,11 @@ class Navbar(QWidget):
         aide = self.menu_bar.addMenu("Aide")
 
         # Ajouter des actions pour "Menu"
-        option1_action = QAction(QIcon("assets/icons/add.png"), "Configuration", self)
-        # option1_action.triggered.connect(self.open_config_window)  # Connexion à la méthode pour ouvrir la fenêtre
+        option1_action = QAction(QIcon("assets/icons/add.png"), "Informations", self)
+        option1_action.triggered.connect(self.open_information_window)  # Connexion à la méthode pour ouvrir la fenêtre
         option2_action = QAction(QIcon("assets/icons/add.png"), "Importation", self)
         option3_action = QAction(QIcon("assets/icons/add.png"), "Exportation", self)
-        option4_action = QAction(QIcon("assets/icons/add.png"), "Paramètrage", self)
+        option4_action = QAction(QIcon("assets/icons/add.png"), "Configuration", self)
         menu.addAction(option1_action)
         menu.addAction(option2_action)
         menu.addAction(option3_action)
@@ -74,5 +74,14 @@ class Navbar(QWidget):
 
         # Appliquer le layout au widget
         self.setLayout(layout)
+        
+        
+    # Méthode pour ouvrir la fenêtre de configuration
+    def open_information_window(self):
+        from views.fenetres.information_organisation_window import InformationOrganisationWindow
+        self.config_window = InformationOrganisationWindow()  # Créer une instance de la fenêtre de configuration
+        self.config_window.exec_()  # Afficher la fenêtre en mode modal
+            
+            
 
 # Assurez-vous que le parent de Navbar n'applique pas de marges

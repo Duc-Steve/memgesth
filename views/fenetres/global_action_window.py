@@ -96,10 +96,10 @@ class GlobaleActionWindow(QWidget):
 
         # Liste des libellés des boutons de la sidebar
         sidebar_button_labels = [
-            "Option 1",
-            "Option 2",
-            "Option 3",
-            "Option 4",
+            "Tableau de bord",
+            "Gestion des membres",
+            "Gestion des employers",
+            "Gestion des candidats",
             "Option 5",
             "Option 6",
         ]

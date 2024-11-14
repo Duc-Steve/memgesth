@@ -21,7 +21,7 @@ class LicenceWindow(QWidget):
         # Définir le titre de la fenêtre
         self.setWindowTitle("Vérification de Licence")
         # Définir la taille fixe de la fenêtre
-        self.setFixedSize(450, 300)
+        self.setFixedSize(500, 300)
 
         self.setWindowIcon(ImagePath.get_icon())
 
