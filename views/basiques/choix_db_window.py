@@ -39,7 +39,7 @@ class ChoixDbWindow(QMainWindow):
         self.valider_button = QPushButton("Valider")
         self.valider_button.clicked.connect(self.valider_choix)
         self.valider_button.setStyleSheet(
-            "background-color: #F45B3C; color: #FFFFFF; font-size: 18px; padding: 5px 10px; border-radius: 8px; margin-top: 15px"
+            "background-color: #121F91; color: #FFFFFF; font-size: 18px; padding: 5px 10px; border-radius: 8px; margin-top: 15px"
         )
         layout.addWidget(self.valider_button)
 

@@ -52,7 +52,7 @@ class AdministrateurWindow(QWidget):
         create_account_button.clicked.connect(self.create_account)
 
         # Styles pour les boutons
-        create_account_button.setStyleSheet("background-color: #F45B3C; font-size: 16px; color: white; border-radius: 5px; padding: 5px 15px 5px 15px;")
+        create_account_button.setStyleSheet("background-color: #121F91; font-size: 16px; color: white; border-radius: 5px; padding: 5px 15px 5px 15px;")
         
         # Alignement à droite des boutons
         button_layout.addStretch()  # Ajoute un espace élastique pour pousser les boutons à droite

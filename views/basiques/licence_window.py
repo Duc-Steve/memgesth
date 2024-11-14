@@ -49,7 +49,7 @@ class LicenceWindow(QWidget):
 
         self.submit_button = QPushButton("Vérifier Licence")
         self.submit_button.setStyleSheet(
-            "background-color: #F45B3C; color: #FFFFFF; font-size: 18px; padding: 5px 10px; border-radius: 8px; margin-top: 15px"
+            "background-color: #121F91; color: #FFFFFF; font-size: 18px; padding: 5px 10px; border-radius: 8px; margin-top: 15px"
         )
         layout.addWidget(self.submit_button)
 

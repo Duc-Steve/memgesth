@@ -1,0 +1,11 @@
+{
+    "authentificationKey": "erdtfyghuj",
+    "licenceKey": "esrdtfg",
+    "choix_localisation_db": "ligne",
+    "api_config": {
+        "url": "http://memgesth.local/api/v1/4b94491d89c5e39f05d55348a9b2f571",
+        "token": "4b94491d89c5e39f05d55348a9b2f571"
+    },
+    "identificationKey": "oui",
+    "administrateurFirst": "oui"
+}

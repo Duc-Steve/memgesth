@@ -12,7 +12,7 @@ class WelcomeWindow(QMainWindow):
         super().__init__()
 
         # Définir le titre et l'icône de la fenêtre
-        self.setWindowTitle("Bienvenue à Teprogesco")
+        self.setWindowTitle("Bienvenue à Memgesth")
         self.setWindowIcon(ImagePath.get_icon())
 
         # Définir la taille de la fenêtre
@@ -46,7 +46,7 @@ class WelcomeWindow(QMainWindow):
         # Bouton "Commencer"
         self.start_button = QPushButton("Commencer")
         self.start_button.setStyleSheet(
-            "background-color: #F45B3C; color: #FFFFFF; font-size: 18px; padding: 10px 20px; border-radius: 8px;"
+            "background-color: #121F91; color: #FFFFFF; font-size: 18px; padding: 10px 20px; border-radius: 8px;"
         )
         layout.addWidget(self.start_button)
         self.start_button.clicked.connect(self.allez_choix_db_window)  
