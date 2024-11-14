@@ -6,6 +6,7 @@ from PySide6.QtCore import QSize
 from config.image_path import ImagePath  # Importation de la classe de configuration du logo
 from services.session_manager import SessionManager
 from composants.navbar import Navbar
+from composants.footer import Footer
 from views.fenetres.pays_installer_window import PaysInstallerWindow
 from views.fenetres.organisation_window import OrganisationWindow
 
@@ -173,6 +174,14 @@ class GlobaleActionWindow(QWidget):
 
         # Ajouter le contenu principal (sidebar + boutons) au layout principal
         main_layout.addLayout(content_layout)
+        
+        # Ajouter le footer en bas
+        self.footer = Footer()
+        main_layout.addWidget(self.footer)
+        
+        
+        
+        
 
     def deconnexion(self):
         """Déconnecter l'utilisateur et revenir à la page de connexion"""

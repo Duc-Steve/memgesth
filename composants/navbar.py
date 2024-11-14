@@ -17,6 +17,7 @@ class Navbar(QWidget):
                 background-color: #121F91;  /* Fond de la barre de menu */
                 color: white;  /* Couleur du texte */
                 padding: 5px;  /* Espacement interne */
+                border-radius: 5px;
             }
             QMenuBar::item {
                 background: transparent;  /* Transparent au départ */
