@@ -12,7 +12,7 @@ from fpdf import FPDF
 from views.fenetres.nouveau_pays_window import NouveauPaysWindow
 from services.configuration_manager import get_api_url
 import requests  # Importation de la bibliothèque requests pour faire des requêtes HTTP
-
+from functools import partial
 
 
 
@@ -45,7 +45,7 @@ class PaysInstallerWindow(QDialog):
         top_button_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
         # Ajout du bouton d'enregistrement du pays
-        add_button = QPushButton("Enregistrement d'un pays")
+        add_button = QPushButton("Nouveau pays")
         add_button.setStyleSheet("margin-bottom: 15px; font-size: 16px; background-color: #67B667; color: white; padding: 10px; border-radius: 5px;")
         add_button.clicked.connect(self.ouvrir_nouveau_pays)
         top_button_layout.addWidget(add_button)
@@ -157,25 +157,33 @@ class PaysInstallerWindow(QDialog):
                 for row, pays in enumerate(pays_list):
                     action_layout = QHBoxLayout()
 
-                    # si le pays est actif
+                    # Si le pays est actif
                     if pays.get('statutPays') == "actif":
-                    
                         delete_button = QPushButton()
                         delete_button.setIcon(QIcon("assets/icons/delete.png"))
                         delete_button.setStyleSheet("background-color: none; border-radius: 5px;")
                         action_layout.addWidget(delete_button)
-                     
-                    # Sinon   
+
+                    # Sinon
                     else:
-                    
                         add_button = QPushButton()
                         add_button.setIcon(QIcon("assets/icons/add2.png"))
                         add_button.setStyleSheet("background-color: none; border-radius: 5px;")
                         action_layout.addWidget(add_button)
-                        
 
                     action_widget = QWidget()
                     action_widget.setLayout(action_layout)
+
+                    # Ajouter un bouton transparent sur l'ensemble du widget pour capturer les clics
+                    click_button = QPushButton(action_widget)
+                    click_button.setStyleSheet("background-color: transparent; border: none;")
+                    click_button.clicked.connect(partial(self.change_statut_country, pays.get('idPays')))
+
+                    # Placer le bouton sur toute la surface du widget
+                    click_button.setGeometry(0, 0, action_widget.width(), action_widget.height())
+                    click_button.raise_()  # Assurez-vous que le bouton est au-dessus des autres éléments
+
+                    # Ajouter le widget d'action à la table
                     self.table.setCellWidget(row, 0, action_widget)
 
                     # Ajouter les données de chaque pays dans le tableau
@@ -202,6 +210,29 @@ class PaysInstallerWindow(QDialog):
             QMessageBox.warning(self, "Erreur API", "Impossible de se connecter à l'API ou d'obtenir la liste des pays.")
 
 
+    def change_statut_country(self, idPays):
+        """Remplir le tableau avec des données et des boutons d'action"""
+
+        # Récupérer la liste des pays depuis l'API
+        response = requests.get(f"{get_api_url()}/statut-pays/{idPays}")  # Assurez-vous que l'endpoint est correct
+
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Vérifier si la réponse contient un code de succès
+            if data.get('code') == 202:
+                QMessageBox.information(self, data.get('message'), data.get('description'))
+                        
+                # Cette méthode devrait recharger les données de l'API et mettre à jour le tableau
+                self.populate_table()
+            else:
+                # Afficher une boîte de message d'avertissement si l'API répond avec un code d'erreur
+                QMessageBox.warning(self, "Erreur", data.get('description'))
+        else:
+            # Gérer les erreurs de connexion à l'API
+            QMessageBox.warning(self, "Erreur API", "Impossible de se connecter à l'API ou d'obtenir la liste des pays.")
+                
+
     def update_table_data(self):
         filter_status = self.status_combo.currentText()
         search_text = self.search_input.text().lower()
@@ -215,6 +246,7 @@ class PaysInstallerWindow(QDialog):
             else:
                 self.table.hideRow(row)
 
+
     def show_export_options(self):
         """Afficher les options d'exportation pour Excel ou PDF"""
         options = ["Excel", "PDF"]
@@ -226,6 +258,7 @@ class PaysInstallerWindow(QDialog):
             elif selected_option == "PDF":
                 self.export_to_pdf()
 
+
     def export_to_excel(self):
         """Exporter les données du tableau en fichier Excel"""
         path, _ = QFileDialog.getSaveFileName(self, "Enregistrer le fichier Excel", "", "Fichiers Excel (*.xlsx)")
@@ -235,6 +268,7 @@ class PaysInstallerWindow(QDialog):
         data = []
         # Récupérer les titres des colonnes
         headers = [self.table.horizontalHeaderItem(col).text() for col in range(self.table.columnCount())]
+        headers = headers[1:]  # Supprimer le premier titre
 
         for row in range(self.table.rowCount()):
             if not self.table.isRowHidden(row):
@@ -251,6 +285,7 @@ class PaysInstallerWindow(QDialog):
             QMessageBox.information(self, "Exportation réussie", f"Le fichier a été exporté avec succès à l'emplacement : {path}")
         except Exception as e:
             QMessageBox.critical(self, "Erreur d'exportation", f"Une erreur s'est produite lors de l'exportation : {str(e)}")   
+
 
     def export_to_pdf(self):
         """Exporter les données du tableau en fichier PDF avec orientation dynamique"""
@@ -302,8 +337,8 @@ class PaysInstallerWindow(QDialog):
             pdf.output(path)
             QMessageBox.information(self, "Exportation réussie", f"Le fichier PDF a été exporté avec succès à l'emplacement : {path}")
         except Exception as e:
-            QMessageBox.critical(self, "Erreur d'exportation", f"Une erreur s'est produite lors de l'exportation : {str(e)}")
-            
+            QMessageBox.critical(self, "Erreur d'exportation", f"Une erreur s'est produite lors de l'exportation : {str(e)}")  
+         
             
     def print_table(self):
         """Imprimer les données du tableau"""
@@ -329,6 +364,7 @@ class PaysInstallerWindow(QDialog):
         # Dessiner le contenu du tableau sur la page
         self.table.render(painter)
         painter.end()
+
 
     def ouvrir_nouveau_pays(self):
         """Afficher la fenêtre NouveauPaysWindow lorsque le bouton est cliqué"""

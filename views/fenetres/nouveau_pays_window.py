@@ -92,17 +92,17 @@ class NouveauPaysWindow(QDialog):
         if response.status_code == 200:
             data = response.json()
             # Si le code est succes
-            if data['code'] == 200:
+            if data.get('code') == 200:
                 
-                QMessageBox.information(self, "Succès", "Le pays à été enregistrer.")
+                QMessageBox.information(self, data.get('message'), data.get('description'))
                         
                 # Émettre le signal pour informer la fenêtre principale
                 self.pays_enregistre.emit()
                 self.accept()  # Fermer la fenêtre
                 
             else:
-                # Afficher une boîte de message avec un titre correct
-                QMessageBox.warning(self, "Erreur", data['message'])
+                # Afficher une boîte de message d'avertissement si l'API répond avec un code d'erreur
+                QMessageBox.warning(self, "Erreur", data.get('description'))
         else:
             # En cas d'erreur de l'API
             QMessageBox.warning(self, "Erreur API", "Impossible de se connecter à l'API ou d'obtenir les administrateurs.")

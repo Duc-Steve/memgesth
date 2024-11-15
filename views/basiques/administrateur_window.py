@@ -90,7 +90,7 @@ class AdministrateurWindow(QWidget):
             data = response.json()
             # Si le code est succes
             if data['code'] == 200:
-                QMessageBox.information(self, "Redirection", "Votre compte a été créé. Vous pouvez maintenant vous connecter.")
+                QMessageBox.information(self, data.get('message'), data.get('description'))
                 
                 with open(CONFIG_FILE, 'r+') as config_file:
                     config_data = json.load(config_file)
@@ -101,8 +101,8 @@ class AdministrateurWindow(QWidget):
                 
                 self.connexion_window()
             else:
-                # Afficher une boîte de message avec un titre correct
-                QMessageBox.warning(self, "Erreur", data['message'])
+                # Afficher une boîte de message d'avertissement si l'API répond avec un code d'erreur
+                QMessageBox.warning(self, "Erreur", data.get('description'))
         else:
             # En cas d'erreur de l'API
             QMessageBox.warning(self, "Erreur API", "Impossible de se connecter à l'API ou d'obtenir les administrateurs.")
