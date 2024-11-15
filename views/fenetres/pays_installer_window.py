@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtPrintSupport import QPrinter, QPrintDialog
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QPainter
+from PySide6.QtCore import QSize
 from config.image_path import ImagePath  # Importation de la classe de configuration du logo
 import pandas as pd
 from fpdf import FPDF
@@ -22,7 +23,7 @@ class PaysInstallerWindow(QDialog):
         super().__init__()
         
         self.setWindowTitle("Gestion des pays")
-        self.setFixedSize(850, 650)
+        self.setFixedSize(1200, 650)
         
         # Définir l'icône de la fenêtre à partir de la classe ImagePath
         self.setWindowIcon(ImagePath.get_icon())
@@ -61,6 +62,15 @@ class PaysInstallerWindow(QDialog):
         # Connexion de l'action du bouton d'impression ici
         top_button_layout.addWidget(print_button)
         
+        
+        rafraichir_button = QPushButton()
+        rafraichir_button.setIcon(QIcon("assets/icons/refresh.png"))  # Chemin de l'icône de déconnexion
+        rafraichir_button.setIconSize(QSize(40, 40))  # Définir la taille de l'icône (ajustez les dimensions selon vos besoins)
+        rafraichir_button.setStyleSheet("margin-bottom: 15px; padding: 10px; font-size: 14px; background-color: white; color: #121F91; border-radius: 5px; border: 2px solid #121F91")
+        rafraichir_button.clicked.connect(self.populate_table)
+        # Connexion de l'action du bouton des donnees de la table ici
+        top_button_layout.addWidget(rafraichir_button)
+        
         # Ajouter le layout text au layout principale
         main_layout.addWidget(text_layout)
 
@@ -84,20 +94,32 @@ class PaysInstallerWindow(QDialog):
 
         main_layout.addLayout(filter_layout)
         
-        # Créer le tableau avec 7 colonnes (le nombre de lignes sera ajusté dynamiquement)
-        self.table = QTableWidget(0, 7, self)  # Initialisation avec 0 lignes
+        # Créer le tableau avec 6 colonnes (le nombre de lignes sera ajusté dynamiquement)
+        self.table = QTableWidget(0, 6, self)  # Initialisation avec 0 lignes
         self.table.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
         # Définir les titres des colonnes
         column_titles = [
             "Action", "Date de Création", "Date Mise à jour", "Nom Pays", "Code Pays", "Statut"
         ]
-
+        
         # Appliquer le style de l'en-tête du tableau
-        self.table.horizontalHeader().setStyleSheet("background-color: #F02B3D; color: white;")
+        self.table.horizontalHeader().setStyleSheet("""
+            QHeaderView::section {
+                background-color: #F02B3D; 
+                color: white; 
+                font-size: 14px; 
+                padding: 5px;
+                border: 1px solid #121F91;
+            }
+        """)
+
+        
+        self.table.setColumnCount(len(column_titles))  # Définir le nombre de colonnes
 
         # Appliquer les titres des colonnes
         self.table.setHorizontalHeaderLabels(column_titles)
+        
 
         # Exemple d'ajout de contenu aux lignes
         self.populate_table()
@@ -162,6 +184,9 @@ class PaysInstallerWindow(QDialog):
                         item = self.table.item(row, col)
                         if item:
                             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                                                
+                    # Ajuster la taille des colonnes en fonction du contenu
+                    self.table.resizeColumnsToContents()
 
             else:
                 # Afficher une boîte de message d'avertissement si l'API répond avec un code d'erreur
