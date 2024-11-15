@@ -38,7 +38,7 @@ class PaysInstallerWindow(QDialog):
         # Titre
         text_layout = QLabel("GESTION DES PAYS")
         text_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        text_layout.setStyleSheet("font-size: 16px; margin-bottom: 15px; background-color: #F02B3D; color: white; border-radius: 5px; padding: 5px;")
+        text_layout.setStyleSheet("font-size: 16px; margin-bottom: 15px; background-color: #121F91; color: white; border-radius: 5px; padding: 5px;")
 
         # Créer un layout horizontal pour les boutons en haut
         top_button_layout = QHBoxLayout()
@@ -82,7 +82,7 @@ class PaysInstallerWindow(QDialog):
 
         # Filtre de statut
         self.status_combo = QComboBox()
-        self.status_combo.addItems(["Tous", "Actif", "Inactif"])
+        self.status_combo.addItems(["Tous", "actif", "inactif"])
         self.status_combo.currentTextChanged.connect(self.update_table_data)
         filter_layout.addWidget(self.status_combo)
 
@@ -157,16 +157,22 @@ class PaysInstallerWindow(QDialog):
                 for row, pays in enumerate(pays_list):
                     action_layout = QHBoxLayout()
 
-                    modify_button = QPushButton()
-                    modify_button.setIcon(QIcon("assets/icons/edit.png"))
-                    modify_button.setStyleSheet("background-color: green; color: white;")
+                    # si le pays est actif
+                    if pays.get('statutPays') == "actif":
                     
-                    delete_button = QPushButton()
-                    delete_button.setIcon(QIcon("assets/icons/delete.png"))
-                    delete_button.setStyleSheet("background-color: red; color: white;")
-
-                    action_layout.addWidget(modify_button)
-                    action_layout.addWidget(delete_button)
+                        delete_button = QPushButton()
+                        delete_button.setIcon(QIcon("assets/icons/delete.png"))
+                        delete_button.setStyleSheet("background-color: none; border-radius: 5px;")
+                        action_layout.addWidget(delete_button)
+                     
+                    # Sinon   
+                    else:
+                    
+                        add_button = QPushButton()
+                        add_button.setIcon(QIcon("assets/icons/add2.png"))
+                        add_button.setStyleSheet("background-color: none; border-radius: 5px;")
+                        action_layout.addWidget(add_button)
+                        
 
                     action_widget = QWidget()
                     action_widget.setLayout(action_layout)
@@ -201,7 +207,7 @@ class PaysInstallerWindow(QDialog):
         search_text = self.search_input.text().lower()
 
         for row in range(self.table.rowCount()):
-            status_match = (filter_status == "Tous" or self.table.item(row, 7).text() == filter_status)
+            status_match = (filter_status == "Tous" or self.table.item(row, 5).text() == filter_status)
             text_match = any(search_text in (self.table.item(row, col).text().lower() if self.table.item(row, col) else "") for col in range(self.table.columnCount()))
 
             if status_match and text_match:
@@ -252,26 +258,34 @@ class PaysInstallerWindow(QDialog):
         if not path:
             return
 
-        # Déterminer l'orientation en fonction du nombre de colonnes
+        # Déterminer le nombre de colonnes
         num_columns = self.table.columnCount()
-        orientation = 'P' if num_columns <= 10 else 'L'  # Portrait si <= 10 colonnes, sinon Paysage
+        
+        # Exemple avec 6 colonnes, ajustez les valeurs pour chaque colonne
+        column_widths = [20, 50, 50, 100, 40, 20]  # Largeur de chaque colonne en mm
 
+        # Vérification pour s'assurer que le nombre de colonnes et la taille des colonnes correspondent
+        if len(column_widths) != num_columns:
+            # Si les largeurs définies ne correspondent pas au nombre de colonnes, utiliser une largeur uniforme
+            cell_width = 280 / num_columns  # Largeur répartie uniformément pour l'orientation paysage
+            column_widths = [cell_width] * num_columns  # Appliquer cette largeur à toutes les colonnes
+
+        # Créer le PDF avec orientation paysage
+        orientation = 'L'  # Orientation paysage
         pdf = FPDF(orientation, 'mm', 'A4')
         pdf.add_page()
         pdf.set_font("Arial", 'B', 16)
-        
+
         # Ajouter un titre
-        pdf.cell(0, 10, "Liste des élèves", 0, 1, 'C')
+        pdf.cell(0, 10, "Liste des pays", 0, 1, 'C')
+
+        # Récupérer les titres des colonnes depuis l'en-tête de la table
+        column_titles = [self.table.horizontalHeaderItem(col).text() for col in range(num_columns)]
         
         # Ajouter les titres des colonnes
         pdf.set_font("Arial", 'B', 12)
-        column_titles = [self.table.horizontalHeaderItem(col).text() for col in range(num_columns)]
-        
-        # Définir la largeur de la cellule en fonction de l'orientation et du nombre de colonnes
-        cell_width = 190 / num_columns if orientation == 'P' else 280 / num_columns
-        
-        for title in column_titles:
-            pdf.cell(cell_width, 10, title, 1, 0, 'C')
+        for i, title in enumerate(column_titles):
+            pdf.cell(column_widths[i], 10, title, 1, 0, 'C')
         pdf.ln()
 
         # Ajouter les données du tableau
@@ -280,7 +294,7 @@ class PaysInstallerWindow(QDialog):
             if not self.table.isRowHidden(row):
                 for col in range(num_columns):
                     item = self.table.item(row, col)
-                    pdf.cell(cell_width, 10, item.text() if item else "", 1)
+                    pdf.cell(column_widths[col], 10, item.text() if item else "", 1)
                 pdf.ln()
 
         # Enregistrer le fichier PDF
@@ -289,7 +303,8 @@ class PaysInstallerWindow(QDialog):
             QMessageBox.information(self, "Exportation réussie", f"Le fichier PDF a été exporté avec succès à l'emplacement : {path}")
         except Exception as e:
             QMessageBox.critical(self, "Erreur d'exportation", f"Une erreur s'est produite lors de l'exportation : {str(e)}")
-
+            
+            
     def print_table(self):
         """Imprimer les données du tableau"""
         printer = QPrinter(QPrinter.HighResolution)
